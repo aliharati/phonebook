@@ -3,6 +3,7 @@ import axios from "axios";
 import Filter from "./components/Filter";
 import PersonForm from "./components/Form";
 import Persons from "./components/Persons";
+import contactService from "./services/contacts";
 
 function App() {
   const [persons, setPersons] = useState([]);
@@ -10,10 +11,11 @@ function App() {
   const [newNumber, setNewNumber] = useState("");
   const [searched, setSearched] = useState(persons);
   const [filter, setFilter] = useState("");
+
   const hook = () => {
-    axios.get("http://localhost:3001/persons").then((resonse) => {
-      setPersons(resonse.data);
-      setSearched(resonse.data);
+    contactService.getAll().then((contacts) => {
+      setPersons(contacts);
+      setSearched(contacts);
     });
   };
   useEffect(hook, []);
@@ -34,13 +36,14 @@ function App() {
       const contactObject = {
         name: newName,
         number: newNumber,
-        id: persons.length + 1,
       };
-      setPersons(persons.concat(contactObject));
-      setSearched(persons.concat(contactObject));
-      setNewName("");
-      setFilter("");
-      setNewNumber("");
+      contactService.create(contactObject).then((returnedContact) => {
+        setPersons(persons.concat(returnedContact));
+        setSearched(persons.concat(returnedContact));
+        setNewName("");
+        setFilter("");
+        setNewNumber("");
+      });
     }
   };
   const handleNewName = (event) => {
@@ -57,6 +60,9 @@ function App() {
       )
     );
   };
+  const deleteContact = (id) => {
+    contactService.deleteId(id);
+  };
 
   return (
     <div>
@@ -71,8 +77,17 @@ function App() {
         nameFunction={handleNewName}
         numberFunction={handleNewNumber}
       />
+
       <h2>Numbers</h2>
-      <Persons list={searched} />
+      <ul>
+        {searched.map((contact) => (
+          <Persons
+            key={contact.id}
+            contact={contact}
+            deleteNumber={() => deleteContact(contact.id)}
+          />
+        ))}
+      </ul>
     </div>
   );
 }

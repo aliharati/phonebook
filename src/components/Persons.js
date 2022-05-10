@@ -1,12 +1,9 @@
-const Persons = ({ list }) => {
+const Persons = ({ contact, deleteNumber }) => {
   return (
-    <ul>
-      {list.map((person) => (
-        <li key={person.id}>
-          {person.name} : {person.number}
-        </li>
-      ))}
-    </ul>
+    <li>
+      {contact.name} : {contact.number}
+      <button onClick={deleteNumber}>delete</button>
+    </li>
   );
 };
 

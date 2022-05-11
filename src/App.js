@@ -1,11 +1,9 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import Filter from "./components/Filter";
 import PersonForm from "./components/Form";
 import Persons from "./components/Persons";
 import contactService from "./services/contacts";
 import { v4 as uuidv4 } from "uuid";
-import contacts from "./services/contacts";
 
 function App() {
   const [persons, setPersons] = useState([]);
@@ -24,8 +22,32 @@ function App() {
 
   const addNewNames = (event) => {
     event.preventDefault();
-    if (persons.filter((person) => person === newName).length !== 0) {
-      alert(`${newName} is already added to phonebook`);
+    if (persons.filter((person) => person.name === newName).length !== 0) {
+      if (
+        window.confirm(
+          `${newName} is already added to phonebook, replace the old number with a new one?`
+        )
+      ) {
+        const contact = persons.find((person) => person.name === newName);
+        const changedContact = { ...contact, number: newNumber };
+        contactService
+          .update(contact.id, changedContact)
+          .then((returnedContact) => {
+            setPersons(
+              persons.map((person) =>
+                person.id !== contact.id ? person : returnedContact
+              )
+            );
+            setSearched(
+              persons.map((person) =>
+                person.id !== contact.id ? person : returnedContact
+              )
+            );
+            setNewName("");
+            setFilter("");
+            setNewNumber("");
+          });
+      }
       setNewName("");
       setNewNumber("");
     } else if (newName === "" && newNumber === "") {

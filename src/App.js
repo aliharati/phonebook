@@ -4,6 +4,8 @@ import Filter from "./components/Filter";
 import PersonForm from "./components/Form";
 import Persons from "./components/Persons";
 import contactService from "./services/contacts";
+import { v4 as uuidv4 } from "uuid";
+import contacts from "./services/contacts";
 
 function App() {
   const [persons, setPersons] = useState([]);
@@ -33,9 +35,11 @@ function App() {
     } else if (newNumber === "") {
       alert("please enter a number for your contact");
     } else {
+      let newId = uuidv4();
       const contactObject = {
         name: newName,
         number: newNumber,
+        id: newId,
       };
       contactService.create(contactObject).then((returnedContact) => {
         setPersons(persons.concat(returnedContact));
@@ -60,8 +64,15 @@ function App() {
       )
     );
   };
-  const deleteContact = (id) => {
-    contactService.deleteId(id);
+  const deleteContact = (id, name) => {
+    let itemIndex = persons.findIndex((contact) => contact.id === id);
+    let newContacts = [].concat(persons);
+    newContacts.splice(itemIndex, 1);
+    if (window.confirm(`Delete ${name} ?`)) {
+      contactService.deleteId(id);
+      setPersons(newContacts);
+      setSearched(newContacts);
+    }
   };
 
   return (
@@ -84,7 +95,7 @@ function App() {
           <Persons
             key={contact.id}
             contact={contact}
-            deleteNumber={() => deleteContact(contact.id)}
+            deleteNumber={() => deleteContact(contact.id, contact.name)}
           />
         ))}
       </ul>

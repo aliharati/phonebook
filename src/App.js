@@ -14,6 +14,7 @@ function App() {
   const [searched, setSearched] = useState(persons);
   const [filter, setFilter] = useState("");
   const [notif, setNotif] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   const hook = () => {
     contactService.getAll().then((contacts) => {
@@ -52,6 +53,10 @@ function App() {
           })
           .catch((error) => {
             giveErrorNotif(changedContact.name);
+            contactService.getAll().then((contacts) => {
+              setPersons(contacts);
+              setSearched(contacts);
+            });
           });
       }
       setNewName("");
@@ -111,14 +116,19 @@ function App() {
   };
 
   const giveErrorNotif = (name) => {
-    setNotif(`Information of ${name} has already been removed from server`);
+    setErrorMessage(
+      `Information of ${name} has already been removed from server`
+    );
+    setTimeout(() => {
+      setErrorMessage(null);
+    }, 5000);
   };
 
   return (
     <div>
       <h2>Phonebook</h2>
       <Notification message={notif} />
-      <Error message={notif} />
+      <Error message={errorMessage} />
       <Filter value={filter} changeFunction={filterContacts} />
 
       <h2>add a new</h2>

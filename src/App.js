@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import Filter from "./components/Filter";
 import PersonForm from "./components/Form";
 import Persons from "./components/Persons";
+import Notification from "./components/Notification";
+import Error from "./components/Error";
 import contactService from "./services/contacts";
 import { v4 as uuidv4 } from "uuid";
 
@@ -11,6 +13,7 @@ function App() {
   const [newNumber, setNewNumber] = useState("");
   const [searched, setSearched] = useState(persons);
   const [filter, setFilter] = useState("");
+  const [notif, setNotif] = useState(null);
 
   const hook = () => {
     contactService.getAll().then((contacts) => {
@@ -46,6 +49,9 @@ function App() {
             setNewName("");
             setFilter("");
             setNewNumber("");
+          })
+          .catch((error) => {
+            giveErrorNotif(changedContact.name);
           });
       }
       setNewName("");
@@ -69,6 +75,7 @@ function App() {
         setNewName("");
         setFilter("");
         setNewNumber("");
+        giveAddNotif(returnedContact.name);
       });
     }
   };
@@ -96,10 +103,22 @@ function App() {
       setSearched(newContacts);
     }
   };
+  const giveAddNotif = (name) => {
+    setNotif(`Added ${name}`);
+    setTimeout(() => {
+      setNotif(null);
+    }, 5000);
+  };
+
+  const giveErrorNotif = (name) => {
+    setNotif(`Information of ${name} has already been removed from server`);
+  };
 
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={notif} />
+      <Error message={notif} />
       <Filter value={filter} changeFunction={filterContacts} />
 
       <h2>add a new</h2>
